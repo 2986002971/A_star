@@ -22,6 +22,8 @@ obstacle_ratio = st.sidebar.slider("障碍物比例", 0.0, 0.5, 0.3, 0.05)
 heuristic = st.sidebar.selectbox(
     "启发式函数", ["manhattan", "euclidean", "chebyshev", "greedy", "dijkstra"]
 )
+if st.session_state.pathfinder is not None:
+    st.session_state.pathfinder.set_heuristic(heuristic)
 
 # 颜色映射
 color_map = {
@@ -70,7 +72,7 @@ if st.session_state.pathfinder is not None:
     st.pyplot(plot_map(st.session_state.pathfinder.get_initial_map()))
 
     # 运行 A* 算法按钮
-    if st.button("运行 A* 算法"):
+    if st.button("求解！"):
         result = st.session_state.pathfinder.find_path()
 
         if result is not None:

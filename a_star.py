@@ -14,7 +14,7 @@ class AStarPathfinder:
         self.heuristic = heuristic_functions[heuristic]
         self.g_scores = np.full((size, size), np.inf)
         self.parents = np.full((size, size, 2), -1, dtype=int)
-        self.open_list = []
+        self.f_minheap = []
         self.directions = [
             (-1, -1),
             (-1, 0),
@@ -25,8 +25,8 @@ class AStarPathfinder:
             (1, 0),
             (1, 1),
         ]
-        self.start = None
-        self.goal = None
+        self.start = tuple(np.argwhere(self.initial_map == CellType.START)[0])
+        self.goal = tuple(np.argwhere(self.initial_map == CellType.END)[0])
 
     def is_valid(self, y, x, from_y=None, from_x=None):
         # 基本的有效性检查
@@ -58,20 +58,16 @@ class AStarPathfinder:
         # 复制初始地图
         self.map = self.initial_map.copy()
 
-        # 找到起点和终点
-        self.start = tuple(np.argwhere(self.map == CellType.START)[0])
-        self.goal = tuple(np.argwhere(self.map == CellType.END)[0])
-
         self.g_scores.fill(np.inf)
         self.parents.fill(-1)
-        self.open_list = []
+        self.f_minheap = []
 
         self.g_scores[self.start] = 0
         f_score = self.heuristic(self.start, self.goal)
-        heapq.heappush(self.open_list, (f_score, self.start))
+        heapq.heappush(self.f_minheap, (f_score, self.start))
 
-        while self.open_list:
-            current_f, current = heapq.heappop(self.open_list)
+        while self.f_minheap:
+            current_f, current = heapq.heappop(self.f_minheap)
 
             if current == self.goal:
                 self.reconstruct_path()
@@ -89,8 +85,9 @@ class AStarPathfinder:
                 if tentative_g < self.g_scores[neighbor]:
                     self.parents[neighbor] = current
                     self.g_scores[neighbor] = tentative_g
-                    f_score = tentative_g + self.heuristic(neighbor, self.goal)
-                    heapq.heappush(self.open_list, (f_score, neighbor))
+                    h = self.heuristic(neighbor, self.goal)
+                    f_score = tentative_g + h
+                    heapq.heappush(self.f_minheap, (f_score, neighbor))
 
                     if self.map[neighbor] == CellType.EMPTY:
                         self.map[neighbor] = CellType.SEARCHED
@@ -106,3 +103,6 @@ class AStarPathfinder:
 
     def get_initial_map(self):
         return self.initial_map
+
+    def set_heuristic(self, heuristic):
+        self.heuristic = heuristic_functions[heuristic]
