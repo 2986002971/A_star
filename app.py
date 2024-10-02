@@ -1,3 +1,5 @@
+import time
+
 import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
@@ -17,7 +19,7 @@ if "pathfinder" not in st.session_state:
 
 # 侧边栏参数设置
 st.sidebar.header("参数设置")
-size = st.sidebar.slider("地图大小", 10, 50, 20)
+size = st.sidebar.slider("地图大小", 10, 200, 20)
 obstacle_ratio = st.sidebar.slider("障碍物比例", 0.0, 0.5, 0.3, 0.05)
 heuristic = st.sidebar.selectbox(
     "启发式函数", ["manhattan", "euclidean", "chebyshev", "greedy", "dijkstra"]
@@ -73,12 +75,17 @@ if st.session_state.pathfinder is not None:
 
     # 运行 A* 算法按钮
     if st.button("求解！"):
+        start_time = time.time()
         result = st.session_state.pathfinder.find_path()
+        execution_time = time.time() - start_time
 
         if result is not None:
             st.subheader("搜索过程和最终路径")
             st.pyplot(plot_map(result))
-            st.success("找到路径！")
+            st.success(
+                f"找到路径！总长度：{st.session_state.pathfinder.get_total_cost()}"
+            )
+            st.success(f"算法执行时间：{execution_time:.4f} 秒")
         else:
             st.error("未找到路径。")
 else:

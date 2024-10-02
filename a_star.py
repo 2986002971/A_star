@@ -106,3 +106,6 @@ class AStarPathfinder:
 
     def set_heuristic(self, heuristic):
         self.heuristic = heuristic_functions[heuristic]
+
+    def get_total_cost(self):
+        return self.g_scores[self.goal]
